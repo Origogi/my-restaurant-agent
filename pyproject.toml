@@ -1,0 +1,12 @@
+[project]
+name = "restaurant-agent"
+version = "0.1.0"
+description = "Restaurant assistant agent sample"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "openai>=2.31.0",
+    "openai-agents>=0.13.6",
+    "python-dotenv>=1.1.1",
+    "streamlit>=1.48.1",
+]
