@@ -1,6 +1,41 @@
-from agents import Agent, RunContextWrapper
+import streamlit as st
+from agents import Agent, RunContextWrapper, handoff
 
-from models import UserAccountContext
+from models import HandoffData, UserAccountContext
+from my_agents.menu_agent import menu_agent
+from my_agents.order_agent import order_agent
+from my_agents.reservation_agent import reservation_agent
+
+
+def handle_handoff(
+    wrapper: RunContextWrapper[UserAccountContext],
+    input_data: HandoffData,
+):
+    handoff_logs = st.session_state.setdefault("handoff_logs", [])
+    handoff_logs.append(input_data.model_dump())
+
+
+def make_handoff(agent: Agent[UserAccountContext], issue_type: str):
+    def on_handoff(
+        wrapper: RunContextWrapper[UserAccountContext],
+        input_data: HandoffData,
+    ):
+        handle_handoff(
+            wrapper,
+            input_data.model_copy(
+                update={
+                    "to_agent_name": agent.name,
+                    "issue_type": issue_type,
+                }
+            ),
+        )
+
+    return handoff(
+        agent=agent,
+        on_handoff=on_handoff,
+        input_type=HandoffData,
+        tool_name_override=f"transfer_to_{issue_type}_agent",
+    )
 
 
 def dynamic_triage_agent_instructions(
@@ -67,6 +102,15 @@ def dynamic_triage_agent_instructions(
     4. If needed, ask one concise clarifying question before routing
     5. Explain the routing briefly and clearly
 
+    HANDOFF DATA RULES:
+    - When you hand off, always provide all four fields:
+      - to_agent_name: the exact specialist agent name
+      - issue_type: one of menu, order, reservation
+      - issue_description: a short summary of the guest's request
+      - reason: a short explanation for why this specialist should handle it
+    - Keep handoff data concise and specific
+    - Do not hand off if the request is still too unclear to classify
+
     IMPORTANT:
     - Do not answer detailed menu, order, or reservation questions yourself if a specialist should handle them
     - Your job is to classify and route accurately
@@ -77,4 +121,9 @@ def dynamic_triage_agent_instructions(
 triage_agent = Agent[UserAccountContext](
     name="Triage Agent",
     instructions=dynamic_triage_agent_instructions,
+    handoffs=[
+        make_handoff(menu_agent, "menu"),
+        make_handoff(order_agent, "order"),
+        make_handoff(reservation_agent, "reservation"),
+    ],
 )

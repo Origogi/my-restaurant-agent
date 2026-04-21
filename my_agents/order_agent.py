@@ -48,5 +48,6 @@ def dynamic_order_agent_instructions(
 
 order_agent = Agent[UserAccountContext](
     name="Order Agent",
+    handoff_description="Use this specialist for taking orders, confirming items, quantities, modifications, and order details.",
     instructions=dynamic_order_agent_instructions,
 )

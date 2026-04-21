@@ -47,5 +47,6 @@ def dynamic_reservation_agent_instructions(
 
 reservation_agent = Agent[UserAccountContext](
     name="Reservation Agent",
+    handoff_description="Use this specialist for table bookings, reservation changes, cancellations, and availability questions.",
     instructions=dynamic_reservation_agent_instructions,
 )
