@@ -1,6 +1,7 @@
 from agents import Agent, RunContextWrapper
 
 from models import UserAccountContext
+from my_agents.output_guardrail import restaurant_output_guardrail
 
 
 def dynamic_menu_agent_instructions(
@@ -50,4 +51,5 @@ menu_agent = Agent[UserAccountContext](
     name="Menu Agent",
     handoff_description="Use this specialist for menu questions, ingredients, recommendations, and allergy or dietary requests.",
     instructions=dynamic_menu_agent_instructions,
+    output_guardrails=[restaurant_output_guardrail],
 )

@@ -4,7 +4,12 @@ from openai import OpenAI
 import asyncio
 import json
 import streamlit as st
-from agents import InputGuardrailTripwireTriggered, Runner, SQLiteSession
+from agents import (
+    InputGuardrailTripwireTriggered,
+    OutputGuardrailTripwireTriggered,
+    Runner,
+    SQLiteSession,
+)
 from models import UserAccountContext
 from my_agents import triage_agent
 
@@ -93,6 +98,15 @@ async def run_agent(message):
                 output_info,
                 "reason",
                 "I can only help with restaurant-related requests.",
+            )
+            text_placeholder.write(reason.replace("$", "\\$"))
+        except OutputGuardrailTripwireTriggered as exc:
+            handoff_placeholder.empty()
+            output_info = exc.guardrail_result.output.output_info
+            reason = getattr(
+                output_info,
+                "reason",
+                "I cannot provide that response safely in this restaurant workflow.",
             )
             text_placeholder.write(reason.replace("$", "\\$"))
 

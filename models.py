@@ -19,3 +19,11 @@ class HandoffData(BaseModel):
 class InputGuardRailOutput(BaseModel):
     is_off_topic: bool
     reason: str
+
+
+class RestaurantOutputGuardRailOutput(BaseModel):
+    contains_off_topic: bool
+    contains_cross_domain_action: bool
+    contains_unverified_action_or_status: bool
+    contains_unsafe_food_claim: bool
+    reason: str
