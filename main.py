@@ -4,7 +4,7 @@ from openai import OpenAI
 import asyncio
 import json
 import streamlit as st
-from agents import Runner, SQLiteSession
+from agents import InputGuardrailTripwireTriggered, Runner, SQLiteSession
 from models import UserAccountContext
 from my_agents import triage_agent
 
@@ -64,27 +64,37 @@ async def run_agent(message):
         st.session_state["handoff_placeholder"] = handoff_placeholder
         st.session_state["text_placeholder"] = text_placeholder
 
-        stream = Runner.run_streamed(
-            triage_agent,
-            message,
-            session=session,
-            context=user_account_ctx,
-        )
+        try:
+            stream = Runner.run_streamed(
+                triage_agent,
+                message,
+                session=session,
+                context=user_account_ctx,
+            )
 
-        async for event in stream.stream_events():
-            if event.type == "agent_updated_stream_event":
-                if event.new_agent.name != triage_agent.name:
-                    handoff_placeholder.write(f"🤖 Transferred to {event.new_agent.name}")
-                    text_placeholder.empty()
-                    text_placeholder = st.empty()
-                    st.session_state["text_placeholder"] = text_placeholder
-                    response = ""
+            async for event in stream.stream_events():
+                if event.type == "agent_updated_stream_event":
+                    if event.new_agent.name != triage_agent.name:
+                        handoff_placeholder.write(f"🤖 Transferred to {event.new_agent.name}")
+                        text_placeholder.empty()
+                        text_placeholder = st.empty()
+                        st.session_state["text_placeholder"] = text_placeholder
+                        response = ""
 
-            elif event.type == "raw_response_event":
+                elif event.type == "raw_response_event":
 
-                if event.data.type == "response.output_text.delta":
-                    response += event.data.delta
-                    text_placeholder.write(response.replace("$", "\\$"))
+                    if event.data.type == "response.output_text.delta":
+                        response += event.data.delta
+                        text_placeholder.write(response.replace("$", "\\$"))
+        except InputGuardrailTripwireTriggered as exc:
+            handoff_placeholder.empty()
+            output_info = exc.guardrail_result.output.output_info
+            reason = getattr(
+                output_info,
+                "reason",
+                "I can only help with restaurant-related requests.",
+            )
+            text_placeholder.write(reason.replace("$", "\\$"))
 
 
 message = st.chat_input(

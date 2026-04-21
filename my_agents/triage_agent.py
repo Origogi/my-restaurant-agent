@@ -2,6 +2,7 @@ import streamlit as st
 from agents import Agent, RunContextWrapper, handoff
 
 from models import HandoffData, UserAccountContext
+from my_agents.input_guardrail import off_topic_guardrail
 from my_agents.menu_agent import menu_agent
 from my_agents.order_agent import order_agent
 from my_agents.reservation_agent import reservation_agent
@@ -121,6 +122,7 @@ def dynamic_triage_agent_instructions(
 triage_agent = Agent[UserAccountContext](
     name="Triage Agent",
     instructions=dynamic_triage_agent_instructions,
+    input_guardrails=[off_topic_guardrail],
     handoffs=[
         make_handoff(menu_agent, "menu"),
         make_handoff(order_agent, "order"),

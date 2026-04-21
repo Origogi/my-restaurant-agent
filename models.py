@@ -14,3 +14,8 @@ class HandoffData(BaseModel):
     issue_type: str
     issue_description: str
     reason: str
+
+
+class InputGuardRailOutput(BaseModel):
+    is_off_topic: bool
+    reason: str
