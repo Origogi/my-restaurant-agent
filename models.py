@@ -5,4 +5,5 @@ class UserAccountContext(BaseModel):
 
     customer_id: int
     name: str
+    email: str
     tier: str = "basic"  # premium entreprise

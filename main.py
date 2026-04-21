@@ -3,17 +3,11 @@ import dotenv
 from openai import OpenAI
 import asyncio
 import streamlit as st
-from agents import Agent, Runner, SQLiteSession, function_tool, RunContextWrapper
+from agents import Runner, SQLiteSession
 from models import UserAccountContext
+from my_agents import triage_agent
 
 dotenv.load_dotenv()
-
-@function_tool
-def get_user_tier(wrapper: RunContextWrapper[UserAccountContext]):
-
-    return (
-        f"The user {wrapper.context.customer_id} has a {wrapper.context.tier} account."
-    )
 
 
 client = OpenAI()
@@ -21,22 +15,11 @@ client = OpenAI()
 user_account_ctx = UserAccountContext(
     customer_id=1,
     name="Origogi",
+    email="origogi@example.com",
     tier="basic",
 )
 
-agent = Agent[UserAccountContext](
-    name="Restaurant Assistant",
-    instructions="""
-    You are a helpful restaurant assistant.
-
-    Help users with restaurant-related questions such as menu guidance,
-    recommendations, reservations, hours, location, and dining policies.
-
-    Use the get_user_tier tool when the user asks about membership tier,
-    benefits, or when account context is relevant to the answer.
-    """,
-    tools=[get_user_tier],
-)
+agent = triage_agent
 
 
 if "session" not in st.session_state:
