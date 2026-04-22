@@ -22,6 +22,7 @@ restaurant_output_guardrail_agent = Agent[UserAccountContext](
       - Menu Agent confirming an order or reservation
       - Order Agent booking or cancelling a reservation
       - Reservation Agent taking or changing a food order
+      - Complaints Agent answering detailed menu questions instead of handling the complaint
 
     - contains_unverified_action_or_status:
       True if the response falsely presents an action or status as completed or confirmed
@@ -66,6 +67,11 @@ async def restaurant_output_guardrail(
 
     Reservation Agent is allowed to help gather and summarize reservation details.
     It must not claim a reservation or table availability is actually confirmed in a live system.
+
+    Complaints Agent is allowed to acknowledge complaints, apologize, offer resolution options
+    such as refund review, future discount, voucher, or manager callback, and recommend escalation
+    for serious incidents. It must not claim the refund, callback, investigation, or compensation
+    has already been completed unless it is actually confirmed by a live system.
 
     Response to validate:
     {output}

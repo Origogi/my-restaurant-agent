@@ -10,6 +10,7 @@ Streamlit UI 위에서 동작하는 OpenAI Agents SDK 기반 레스토랑 어시
 - `Menu Agent`: 메뉴, 재료, 추천, 알레르기/식이 관련 질문 처리
 - `Order Agent`: 주문 접수, 수량/옵션 확인, 주문 요약 처리
 - `Reservation Agent`: 예약 생성, 변경, 취소, 인원/시간 관련 질문 처리
+- `Complaints Agent`: 불만 접수, 공감/사과, 보상 옵션 안내, 매니저 에스컬레이션 처리
 
 ## Handoff Diagram
 
@@ -20,7 +21,8 @@ User
 Triage Agent
   |---> Menu Agent
   |---> Order Agent
-  `---> Reservation Agent
+  |---> Reservation Agent
+  `---> Complaints Agent
 ```
 
 핵심 동작:
@@ -42,6 +44,7 @@ Triage Agent
 │   ├── menu_agent.py
 │   ├── order_agent.py
 │   ├── output_guardrail.py
+│   ├── complaints_agent.py
 │   └── reservation_agent.py
 ├── pyproject.toml
 └── README.md
@@ -73,6 +76,7 @@ streamlit run main.py
 - `채식 메뉴 추천해줘`
 - `버거 두 개랑 콜라 하나 주문할게요`
 - `견과류 들어간 메뉴가 있나요?`
+- `음식이 너무 별로였고 직원도 불친절했어`
 
 ## Guardrails
 
@@ -105,6 +109,8 @@ Output guardrail model:
   레스토랑 도메인을 벗어나면 `contains_off_topic=true`
 - `비건 메뉴 추천해주고, 정확한 재료는 직원에게 다시 확인이 필요하다고 함께 안내해줘`
   신중한 응답이면 tripwire 없이 통과하는 정상 케이스
+- `음식이 너무 별로였고 직원도 불친절했어. 환불이나 매니저 콜백 가능한지 알려줘`
+  `Complaints Agent`로 handoff 되어 공감, 해결 옵션, 에스컬레이션을 안내하는 정상 케이스
 
 ## Notes
 

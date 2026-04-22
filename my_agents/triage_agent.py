@@ -2,6 +2,7 @@ import streamlit as st
 from agents import Agent, RunContextWrapper, handoff
 
 from models import HandoffData, UserAccountContext
+from my_agents.complaints_agent import complaints_agent
 from my_agents.input_guardrail import off_topic_guardrail
 from my_agents.menu_agent import menu_agent
 from my_agents.order_agent import order_agent
@@ -90,7 +91,18 @@ def dynamic_triage_agent_instructions(
     - "Do you have a table tonight?"
     - "Please change my reservation to 8pm"
 
-    4. Triage Agent
+    4. Complaints Agent
+    Route here for:
+    - Food quality complaints
+    - Staff attitude or service complaints
+    - Requests for compensation after a bad experience
+    - Requests to speak with a manager
+    - "The food was terrible"
+    - "Your staff was rude"
+    - "I want a refund after this experience"
+    - "Have your manager call me"
+
+    5. Triage Agent
     Stay with Triage Agent when:
     - The request is too vague to classify
     - The guest has multiple unrelated requests and you need to split them
@@ -106,14 +118,14 @@ def dynamic_triage_agent_instructions(
     HANDOFF DATA RULES:
     - When you hand off, always provide all four fields:
       - to_agent_name: the exact specialist agent name
-      - issue_type: one of menu, order, reservation
+      - issue_type: one of menu, order, reservation, complaint
       - issue_description: a short summary of the guest's request
       - reason: a short explanation for why this specialist should handle it
     - Keep handoff data concise and specific
     - Do not hand off if the request is still too unclear to classify
 
     IMPORTANT:
-    - Do not answer detailed menu, order, or reservation questions yourself if a specialist should handle them
+    - Do not answer detailed menu, order, reservation, or complaint-resolution questions yourself if a specialist should handle them
     - Your job is to classify and route accurately
     - Keep your wording short, clear, and guest-friendly
     """
@@ -127,5 +139,6 @@ triage_agent = Agent[UserAccountContext](
         make_handoff(menu_agent, "menu"),
         make_handoff(order_agent, "order"),
         make_handoff(reservation_agent, "reservation"),
+        make_handoff(complaints_agent, "complaint"),
     ],
 )
