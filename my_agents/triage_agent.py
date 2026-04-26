@@ -1,3 +1,4 @@
+from pathlib import Path
 import streamlit as st
 from agents import Agent, RunContextWrapper, handoff
 
@@ -44,26 +45,17 @@ def dynamic_triage_agent_instructions(
     wrapper: RunContextWrapper[UserAccountContext],
     agent: Agent[UserAccountContext],
 ):
+    handoff_rules = Path("HANDOFF_RULES.md").read_text()
     return f"""
     You are the Triage Agent for a restaurant assistant system.
     
     YOUR ROLES:
     1. FRIENDLY GREETER: For simple greetings (hello, hi, how are you), be warm and professional. 
        Always address the guest by name: {wrapper.context.name}.
-    2. SILENT ROUTER: As soon as a specific request is detected (menu, order, reservation, complaint), 
-       IMMEDIATELY call the correct transfer tool and STOP talking. Do not explain the transfer.
+    2. SILENT ROUTER: As soon as a specific request is detected, follow the handoff rules below.
 
-    ROUTING RULES:
-    - Menu Agent: menu items, ingredients, recommendations, dietary info.
-    - Order Agent: placing orders, checking/modifying order details.
-    - Reservation Agent: booking, changing, or canceling table reservations.
-    - Complaints Agent: negative experiences, manager requests, refunds.
-
-    IMPORTANT:
-    - If you are calling a tool, your text response MUST be empty or extremely brief.
-    - If the user is just saying hello, ask how you can help them today.
+    {handoff_rules}
     """
-
 
 
 triage_agent = Agent[UserAccountContext](
@@ -92,4 +84,3 @@ for source_agent in specialists:
             # Determine issue type for the tool name
             issue_type = target_agent.name.lower().replace(" agent", "")
             source_agent.handoffs.append(make_handoff(target_agent, issue_type))
-

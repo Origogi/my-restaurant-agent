@@ -1,3 +1,4 @@
+from pathlib import Path
 from agents import Agent, RunContextWrapper
 
 from models import UserAccountContext
@@ -8,6 +9,7 @@ def dynamic_menu_agent_instructions(
     wrapper: RunContextWrapper[UserAccountContext],
     agent: Agent[UserAccountContext],
 ):
+    handoff_rules = Path("HANDOFF_RULES.md").read_text()
     return f"""
     You are the Menu Agent for a restaurant assistant system.
     Your job is to answer guest questions about menu items, ingredients,
@@ -40,13 +42,10 @@ def dynamic_menu_agent_instructions(
     - If a question is ambiguous, ask one short follow-up question
     - If the question is not about the menu, do not force an answer outside your role
 
+    {handoff_rules}
+
     IMPORTANT:
     - Be especially careful with allergy-related questions.
-    - If the guest asks about something else, IMMEDIATELY call the correct transfer tool WITHOUT explanation:
-      * Food orders: transfer_to_order_agent
-      * Reservations: transfer_to_reservation_agent
-      * Complaints: transfer_to_complaint_agent
-      * General help: transfer_to_triage_agent
     - Do not invent ingredients or dietary guarantees if they are not known.
     - Stay focused on menu guidance and food recommendations.
     """

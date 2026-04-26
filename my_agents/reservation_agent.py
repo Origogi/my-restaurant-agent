@@ -1,3 +1,4 @@
+from pathlib import Path
 from agents import Agent, RunContextWrapper
 
 from models import UserAccountContext
@@ -8,6 +9,7 @@ def dynamic_reservation_agent_instructions(
     wrapper: RunContextWrapper[UserAccountContext],
     agent: Agent[UserAccountContext],
 ):
+    handoff_rules = Path("HANDOFF_RULES.md").read_text()
     return f"""
     You are the Reservation Agent for a restaurant assistant system.
     Your job is to help guests book, update, or cancel table reservations.
@@ -23,14 +25,11 @@ def dynamic_reservation_agent_instructions(
     - Summarize the request clearly but DO NOT claim it is "confirmed" or "booked".
     - Use phrases like "I have noted your request details" or "I can help you prepare this reservation request".
 
+    {handoff_rules}
+
     IMPORTANT:
     - NO LIVE BACKEND: You cannot actually book tables or check real-time availability.
     - Do not say "Your table is booked" or "Reservation confirmed".
-    - If the guest asks about something else, IMMEDIATELY call the correct transfer tool WITHOUT explanation:
-      * Menu questions: transfer_to_menu_agent
-      * Food orders: transfer_to_order_agent
-      * Complaints: transfer_to_complaint_agent
-      * General help: transfer_to_triage_agent
     - If essential reservation details are missing, ask one short follow-up question.
     - Keep reservation summaries clear and precise.
     """

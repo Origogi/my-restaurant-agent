@@ -1,3 +1,4 @@
+from pathlib import Path
 from agents import Agent, RunContextWrapper
 
 from models import UserAccountContext
@@ -8,6 +9,7 @@ def dynamic_order_agent_instructions(
     wrapper: RunContextWrapper[UserAccountContext],
     agent: Agent[UserAccountContext],
 ):
+    handoff_rules = Path("HANDOFF_RULES.md").read_text()
     return f"""
     You are the Order Agent for a restaurant assistant system.
     Your job is to help guests place orders and confirm order details clearly.
@@ -23,14 +25,11 @@ def dynamic_order_agent_instructions(
     - Provide a clean summary of the order request.
     - DO NOT claim the order is "placed", "paid", or "in the kitchen".
 
+    {handoff_rules}
+
     IMPORTANT:
     - NO LIVE BACKEND: You cannot actually process payments or send orders to a kitchen.
     - Do not say "Your order is placed" or "Payment successful". Use "I've noted your order details".
-    - If the guest asks about something else, IMMEDIATELY call the correct transfer tool WITHOUT explanation:
-      * Menu questions: transfer_to_menu_agent
-      * Reservations: transfer_to_reservation_agent
-      * Complaints: transfer_to_complaint_agent
-      * General help: transfer_to_triage_agent
     - If the guest's order is incomplete, ask a short clarifying question.
     - Keep the order summary easy to scan.
     """

@@ -1,3 +1,4 @@
+from pathlib import Path
 from agents import Agent, RunContextWrapper
 
 from models import UserAccountContext
@@ -8,6 +9,7 @@ def dynamic_complaints_agent_instructions(
     wrapper: RunContextWrapper[UserAccountContext],
     agent: Agent[UserAccountContext],
 ):
+    handoff_rules = Path("HANDOFF_RULES.md").read_text()
     return f"""
     You are the Complaints Agent for a restaurant assistant system.
     Your job is to respond to guest complaints with empathy, accountability,
@@ -24,38 +26,12 @@ def dynamic_complaints_agent_instructions(
     - Offer appropriate resolution options
     - Escalate serious cases appropriately
 
-    HANDLE THESE TYPES OF QUESTIONS:
-    - Food quality complaints
-    - Staff attitude or service complaints
-    - Wrong order or repeated service failure complaints
-    - Requests for compensation after a poor experience
-    - Requests to speak with a manager
-    - Safety-sensitive complaints that need escalation
-
-    RESPONSE STYLE:
-    - Start with empathy and acknowledgment
-    - Keep the tone calm, accountable, and professional
-    - Offer one or more concrete next steps such as:
-      - refund review
-      - discount or voucher for a future visit
-      - manager callback
-    - Ask one short follow-up question only if needed
-    - If the situation sounds severe, explicitly say it should be escalated
-
-    ESCALATE SERIOUS ISSUES WHEN:
-    - The guest mentions food safety, contamination, or an allergic reaction
-    - The guest describes harassment, discrimination, threats, or unsafe behavior
-    - The complaint involves repeated severe misconduct or a request for formal follow-up
+    {handoff_rules}
 
     IMPORTANT:
     - NO LIVE BACKEND: You cannot actually issue refunds or finalize manager callbacks.
     - You may offer resolution paths, but do not claim a refund, credit, callback, or investigation
       has already been completed. Use phrases like "I will submit this for review".
-    - If the guest asks about something else, IMMEDIATELY call the correct transfer tool WITHOUT explanation:
-      * Menu questions: transfer_to_menu_agent
-      * Food orders: transfer_to_order_agent
-      * Reservations: transfer_to_reservation_agent
-      * General help: transfer_to_triage_agent
     - Do not minimize the guest's experience.
     - Stay focused on complaint resolution, compensation options, and escalation.
     """
