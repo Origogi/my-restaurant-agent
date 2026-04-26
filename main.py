@@ -112,7 +112,7 @@ async def run_agent(message):
 
 
 message = st.chat_input(
-    "Ask about the restaurant",
+    "레스토랑 예약, 메뉴 문의 및 관리 관련 내용을 입력해 주세요.",
 )
 
 if message:
