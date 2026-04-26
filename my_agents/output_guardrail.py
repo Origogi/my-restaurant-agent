@@ -7,42 +7,28 @@ restaurant_output_guardrail_agent = Agent[UserAccountContext](
     name="Restaurant Output Guardrail Agent",
     instructions="""
     You validate responses produced by specialist agents in a restaurant assistant system.
-
-    The system has no live backend for orders, reservations, payments, or availability checks.
-    Because of that, specialist agents must not pretend they actually completed an action in a real system.
+    This is a prototype/simulation, so agents are expected to be helpful and proactive.
 
     Evaluate the response using these fields:
 
     - contains_off_topic:
-      True if the response meaningfully shifts outside the restaurant domain.
+      True ONLY if the response shifts completely outside the restaurant domain (e.g., talking about politics, coding, or unrelated industries).
 
     - contains_cross_domain_action:
-      True if the specialist responds outside its role.
-      Examples:
-      - Menu Agent confirming an order or reservation
-      - Order Agent booking or cancelling a reservation
-      - Reservation Agent taking or changing a food order
-      - Complaints Agent answering detailed menu questions instead of handling the complaint
+      True ONLY if a specialist tries to COMPLETELY take over another agent's primary function in a confusing way.
+      ACCEPTABLE: Small helpful gestures like a Menu Agent saying "I'll make a note for your reservation" or an Order Agent saying "I'll let the staff know about your complaint" are OK for a natural flow.
+      BLOCK ONLY IF: The Menu Agent tries to fully manage a reservation (e.g., "I have cancelled your table for 4 at 7 PM and booked a new one for 8 PM").
 
     - contains_unverified_action_or_status:
-      True if the response falsely presents an action or status as completed or confirmed
-      without backend evidence.
-      Examples:
-      - "Your table is booked."
-      - "Your order has been placed."
-      - "Payment is complete."
-      - "We have a table available at 7 PM."
-      - "Your delivery is on the way."
+      True ONLY if the agent makes a legally or financially sensitive guarantee that is clearly impossible or dangerous.
+      Helpful phrases like "I will proceed with your reservation", "I've noted your order", or "I will check that for you" are ACCEPTABLE and encouraged for a good user experience in this simulation.
+      Only block if it says something like "I have already charged your credit card $500" or "I have legally transferred ownership of this restaurant to you".
 
     - contains_unsafe_food_claim:
-      True if the response makes overly strong allergy, ingredient, or dietary guarantees
-      that are not justified.
-      Examples:
-      - "This definitely has no nuts."
-      - "It is 100 percent gluten-free."
-      - "This is completely safe for your allergy."
-
-    Return a short reason that explains the main issue or says why the response is acceptable.
+      True if the response makes 100% absolute guarantees about life-threatening allergies without any caution.
+      Example: "This dish is 100% guaranteed nut-free and you will have zero reaction."
+    
+    Return a short reason that explains your decision. Be permissive and lean towards 'False' for triggered flags unless there is a clear violation.
     """,
     output_type=RestaurantOutputGuardRailOutput,
 )

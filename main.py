@@ -41,6 +41,11 @@ async def paint_history():
     messages = await session.get_items()
     for message in messages:
         if "role" in message:
+            # Determine label based on role and metadata
+            label = "human" if message["role"] == "user" else "ai"
+            if label == "ai" and "sender" in message:
+                label = f"ai ({message['sender']})"
+
             with st.chat_message(message["role"]):
                 if message["role"] == "user":
                     st.write(message["content"])
@@ -51,6 +56,7 @@ async def paint_history():
             message.get("type") == "function_call"
             and message.get("name", "").startswith("transfer_to_")
         ):
+
             handoff_data = json.loads(message["arguments"])
             with st.chat_message("ai"):
                 st.write(f"🤖 Transferred to {handoff_data['to_agent_name']}")
@@ -59,9 +65,13 @@ async def paint_history():
 asyncio.run(paint_history())
 
 
-async def run_agent(message):
+if "current_agent" not in st.session_state:
+    st.session_state["current_agent"] = triage_agent
 
+async def run_agent(message):
+    current_agent_name = st.session_state["current_agent"].name
     with st.chat_message("ai"):
+        st.caption(f"Connected to: **{current_agent_name}**")
         handoff_placeholder = st.empty()
         text_placeholder = st.empty()
         response = ""
@@ -70,8 +80,9 @@ async def run_agent(message):
         st.session_state["text_placeholder"] = text_placeholder
 
         try:
+            initial_agent_name = st.session_state["current_agent"].name
             stream = Runner.run_streamed(
-                triage_agent,
+                st.session_state["current_agent"],
                 message,
                 session=session,
                 context=user_account_ctx,
@@ -79,12 +90,20 @@ async def run_agent(message):
 
             async for event in stream.stream_events():
                 if event.type == "agent_updated_stream_event":
-                    if event.new_agent.name != triage_agent.name:
-                        handoff_placeholder.write(f"🤖 Transferred to {event.new_agent.name}")
-                        text_placeholder.empty()
-                        text_placeholder = st.empty()
-                        st.session_state["text_placeholder"] = text_placeholder
-                        response = ""
+                    new_agent = event.new_agent
+                    # Only show transfer message if it's a specialist (skip Triage in UI)
+                    if new_agent.name != initial_agent_name:
+                        if new_agent.name != "Triage Agent":
+                            handoff_placeholder.write(f"🤖 Transferred to {new_agent.name}")
+                            text_placeholder.empty()
+                            text_placeholder = st.empty()
+                            st.session_state["text_placeholder"] = text_placeholder
+                            response = ""
+                        current_agent_name = new_agent.name
+                        st.caption(f"Connected to: **{current_agent_name}**")
+                        initial_agent_name = new_agent.name
+                    
+                    st.session_state["current_agent"] = new_agent
 
                 elif event.type == "raw_response_event":
 
@@ -126,6 +145,8 @@ if message:
 
 
 with st.sidebar:
+    st.info(f"🟢 **Current Agent:** {st.session_state['current_agent'].name}")
+    
     reset = st.button("Reset memory")
     if reset:
         asyncio.run(session.clear_session())
