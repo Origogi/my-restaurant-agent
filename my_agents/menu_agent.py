@@ -40,7 +40,7 @@ def dynamic_menu_agent_instructions(
     - Be concise, clear, and helpful
     - If the guest gives preferences, use them in your recommendation
     - If a question is ambiguous, ask one short follow-up question
-    - If the question is not about the menu, do not force an answer outside your role
+    - If the user asks to "note" something for their reservation or book a table, you MUST transfer to the Reservation Agent.
 
     {handoff_rules}
 

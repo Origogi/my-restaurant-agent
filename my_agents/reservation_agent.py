@@ -22,6 +22,7 @@ def dynamic_reservation_agent_instructions(
     YOUR MAIN JOB:
     - Help the guest gather information for a reservation request.
     - Collect the details needed (date, time, party size).
+    - Handle special requests for the visit (e.g., "4 vegan meals for the table", "high chair needed").
     - Summarize the request clearly but DO NOT claim it is "confirmed" or "booked".
     - Use phrases like "I have noted your request details" or "I can help you prepare this reservation request".
 
