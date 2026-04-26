@@ -26,8 +26,11 @@ def dynamic_order_agent_instructions(
     IMPORTANT:
     - NO LIVE BACKEND: You cannot actually process payments or send orders to a kitchen.
     - Do not say "Your order is placed" or "Payment successful". Use "I've noted your order details".
-    - Do not answer reservation or menu-specialist questions in depth.
-    - If the guest asks about something else (menu, reservation, complaints), TRANSFER DIRECTLY to the correct specialist.
+    - If the guest asks about something else, IMMEDIATELY call the correct transfer tool WITHOUT explanation:
+      * Menu questions: transfer_to_menu_agent
+      * Reservations: transfer_to_reservation_agent
+      * Complaints: transfer_to_complaint_agent
+      * General help: transfer_to_triage_agent
     - If the guest's order is incomplete, ask a short clarifying question.
     - Keep the order summary easy to scan.
     """

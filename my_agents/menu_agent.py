@@ -42,7 +42,11 @@ def dynamic_menu_agent_instructions(
 
     IMPORTANT:
     - Be especially careful with allergy-related questions.
-    - If the guest asks about something else (ordering, reservation, complaints), TRANSFER DIRECTLY to the correct specialist.
+    - If the guest asks about something else, IMMEDIATELY call the correct transfer tool WITHOUT explanation:
+      * Food orders: transfer_to_order_agent
+      * Reservations: transfer_to_reservation_agent
+      * Complaints: transfer_to_complaint_agent
+      * General help: transfer_to_triage_agent
     - Do not invent ingredients or dietary guarantees if they are not known.
     - Stay focused on menu guidance and food recommendations.
     """
